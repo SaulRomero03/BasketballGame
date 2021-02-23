@@ -58,14 +58,13 @@ class BallAnimation():
         self.head = self._canvas.create_rectangle(180,405,250,475, fil='blue', outline='black', tags='Body')
         self.body = self._canvas.create_oval(180,470 , 240, 550, fill = 'red', outline ='black', tags='Body')
         self.arms = self._canvas.create_rectangle(235,490,310,500, fill = 'orange', outline = 'black', tags='Body')
-
+        self.shootingline = self._canvas.create_arc(235, 200, 600, 490, style=tkinter.ARC, fill='black', dash=(3,5), extent=-45, start=180)
 
     # Create a canvas for animation and add it to main window
     def create_canvas(self):
         self._canvas = tkinter.Canvas(self._frame, height=self._canvas_height, width=self._canvas_width)
         self._canvas.grid(column=0, row=1)
         self._canvas.configure(bg="white")
-
         self._canvas.bind_all( '<Button-1>', self._print_location)
         self._canvas.bind_all( '<ButtonRelease-1>', self._print_location2)
         self._canvas.bind_all('<Key-Left>', self.moveleft)
@@ -80,6 +79,7 @@ class BallAnimation():
     def _print_location(self, event):
         print( 'Button 1 was pressed at pixel x=%d, y=%d' % (event.x, event.y))
         self.start =  (event.x, event.y)
+
     def _print_location2(self, event):
         print( 'Button 1 was released at pixel x=%d, y=%d' % (event.x, event.y))
         self.stop =  (event.x, event.y)
@@ -146,13 +146,20 @@ class BallAnimation():
 
         # adding gravity
         self._yinc = self._yinc + self.gravity  # the top of the screen is y = 0, bottom is y = window height
-        if xr > self._canvas_width - abs(self._xinc):
-            #if self.start[0]>400:
-            if self._canvas_width-self.start[0]>400:
-                self.score = self.score + 3
+        if (xr - self._xinc) <=700 and xr > 700:
+            if self.start[0]<400:
+                self.score= self.score + 3
+
             else:
-                self.score = self.score + 2
-            self.scorestring.set("Score=%d" %self.score)
+                self.score = self.score +2
+            self.scorestring.set("Score=%d" % self.score)
+        # if xr > self._canvas_width - abs(self._xinc):
+        #     #if self.start[0]>400:
+        #     if self._canvas_width-self.start[0]:
+        #         self.score = self.score + 3
+        #     else:
+        #         self.score = self.score + 2
+        #     self.scorestring.set("Score=%d" %self.score)
         if xl < abs(self._xinc) or xr > self._canvas_width - abs(self._xinc):
             self._xinc = -self._xinc * 0.8
 
