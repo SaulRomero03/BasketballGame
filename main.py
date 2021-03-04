@@ -23,6 +23,7 @@ class BallAnimation():
         self.create_canvas()
         self.create_ball()
         self.create_background()
+        self.mouse_is_clicked = False
 
     def run(self, xinc, yinc):
         self._xinc = xinc
@@ -85,7 +86,8 @@ class BallAnimation():
     def _print_location(self, event):
         print( 'Button 1 was pressed at pixel x=%d, y=%d' % (event.x, event.y))
         self.start =  (event.x, event.y)
-        self.mouseclicked = True
+        self.mouse_is_clicked = True
+        self.animate_power_meter()
 
     def _print_location2(self, event):
         print( 'Button 1 was released at pixel x=%d, y=%d' % (event.x, event.y))
@@ -107,7 +109,7 @@ class BallAnimation():
                             self.start[1] - self._ball_radius,
                             self.start[0] + self._ball_radius,
                             self.start[1] + self._ball_radius)
-        self.mouseclicked = False
+        self.mouse_is_clicked = False
 
     def moveleft(self, event):
         self.xspeed = - 5
@@ -175,6 +177,32 @@ class BallAnimation():
             self._yinc = -self._yinc * 0.8
         self._root.after(self._refresh_msec, self.animate_ball)
 
+    # Update the power meter animation
+    def animate_power_meter(self):
+        # delete the existing one
+        self._canvas.delete('power_meter')
+        # only update while the button is held down
+        if not self.mouse_is_clicked:
+            return
+        # Figure out where the cursor is now
+        cursor_x = self._canvas.winfo_pointerx() - self._canvas.winfo_rootx()
+        cursor_y = self._canvas.winfo_pointery() - self._canvas.winfo_rooty()
+        # Get the arrow direction as difference between current mouse position and where click started
+        dx = cursor_x - self.start[0]
+        dy = cursor_y - self.start[1]
+        scale = 0.25
+        # Start the arrow at a fixed position
+        #arrow_start_pos = self._canvas_width - 50, 50
+
+        # Start the arrow where the ball is
+        xl, yl, xr, yr = self._canvas.coords(self._ball)
+        arrow_start_pos = (xl+xr)/2., (yl+yr)/2.
+
+        # Create the line
+        self._canvas.create_line(arrow_start_pos[0], arrow_start_pos[1], arrow_start_pos[0] + dx * scale,
+                                 arrow_start_pos[1] + dy * scale, tags='power_meter', arrow=tkinter.FIRST)
+        # Call this function again after _refresh_msec to update the power arrow
+        self._root.after(self._refresh_msec, self.animate_power_meter)
 
 
 def main():
