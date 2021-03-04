@@ -58,7 +58,13 @@ class BallAnimation():
         self.head = self._canvas.create_rectangle(180,405,250,475, fil='blue', outline='black', tags='Body')
         self.body = self._canvas.create_oval(180,470 , 240, 550, fill = 'red', outline ='black', tags='Body')
         self.arms = self._canvas.create_rectangle(235,490,310,500, fill = 'orange', outline = 'black', tags='Body')
-        self.shootingline = self._canvas.create_arc(235, 200, 600, 490, style=tkinter.ARC, fill='black', dash=(3,5), extent=-45, start=180)
+        self.shootingline = self._canvas.create_arc(310, 600, 600, 350, style=tkinter.ARC, fill='black', dash=(3,5), extent=-100, start=180)
+
+        #if self.mouseclicked == True:
+            #self._canvas.show(self.shootingline)
+        #else:
+            #self._canvas.delete(self.shootingline)
+
 
     # Create a canvas for animation and add it to main window
     def create_canvas(self):
@@ -79,6 +85,7 @@ class BallAnimation():
     def _print_location(self, event):
         print( 'Button 1 was pressed at pixel x=%d, y=%d' % (event.x, event.y))
         self.start =  (event.x, event.y)
+        self.mouseclicked = True
 
     def _print_location2(self, event):
         print( 'Button 1 was released at pixel x=%d, y=%d' % (event.x, event.y))
@@ -100,6 +107,7 @@ class BallAnimation():
                             self.start[1] - self._ball_radius,
                             self.start[0] + self._ball_radius,
                             self.start[1] + self._ball_radius)
+        self.mouseclicked = False
 
     def moveleft(self, event):
         self.xspeed = - 5
@@ -146,7 +154,7 @@ class BallAnimation():
 
         # adding gravity
         self._yinc = self._yinc + self.gravity  # the top of the screen is y = 0, bottom is y = window height
-        if (xr - self._xinc) <=700 and xr > 700:
+        if (xr - self._xinc) <=700 and xr > 700 and (yl - self._yinc) <=325 and yl > 325:
             if self.start[0]<400:
                 self.score= self.score + 3
 
@@ -166,6 +174,7 @@ class BallAnimation():
         if yl < abs(self._yinc) or yr > self._canvas_height - abs(self._yinc):
             self._yinc = -self._yinc * 0.8
         self._root.after(self._refresh_msec, self.animate_ball)
+
 
 
 def main():
