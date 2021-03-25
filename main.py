@@ -3,8 +3,8 @@ from tkinter import ttk
 
 
 class BallAnimation():
-    def __init__(self, canvas_width=800, canvas_height=600,
-                 ball_start_xpos=315, ball_start_ypos=495,
+    def __init__(self, canvas_width=1200, canvas_height=800,
+                 ball_start_xpos=100, ball_start_ypos=100,
                  ball_radius=30, refresh_msec=10):
         # width of the animation window
         self._canvas_width = canvas_width
@@ -24,7 +24,15 @@ class BallAnimation():
         self.create_ball()
         self.create_background()
         self.mouse_is_clicked = False
-
+    def start(self):
+        xl, yl, xr, yr = self._canvas.coords(self.arms)
+        y =  (yl + yr) /2
+        self._canvas.coords(self._ball,
+                            xr - self._ball_radius,
+                            y - self._ball_radius,
+                            xr + self._ball_radius,
+                            y + self._ball_radius)
+        self.animatetimer()
     def run(self, xinc, yinc):
         self._xinc = xinc
         self._yinc = yinc
@@ -47,33 +55,46 @@ class BallAnimation():
                                                                                                sticky=tkinter.N)
         # Create the drawing canvas
         #self.create_canvas()
-        self.score = 0
-        self.scorestring = tkinter.StringVar(self._frame,"Score= 0")
-        self.scoreboard = ttk.Label(self._frame, textvariable=self.scorestring).grid(column=0, row=2)
+
+    def animatetimer(self):
+        self.timer= self.timer - self._refresh_msec/1000 #(refresh_msec = .01)
+        self.timerstr.set("Time: %.2f" % self.timer)
+        self._root.after(self._refresh_msec, self.animatetimer)
+
 
     def create_background(self):
-        self.base = self._canvas.create_rectangle(765,325,800,600,fill="yellow", outline="black")
+        self.base = self._canvas.create_rectangle(765,325,800,600,fill="#7E7E7E", outline='black', dash = (3,8),  width = 3,  tags = 'hoop')
                                                 #(x1,y1 Left top Corner & x2,y2 Right Bottom corner))
-        self.hoop = self._canvas.create_rectangle(700,320,780,325, fill='red', outline="black")
+        self.hoop = self._canvas.create_rectangle(700,320,780,325, fill='white', outline="#D0312D", tags = 'hoop', width = 2.5 )
 
-        self.head = self._canvas.create_rectangle(180,405,250,475, fil='blue', outline='black', tags='Body')
-        self.body = self._canvas.create_oval(180,470 , 240, 550, fill = 'red', outline ='black', tags='Body')
-        self.arms = self._canvas.create_rectangle(235,490,310,500, fill = 'orange', outline = 'black', tags='Body')
-        self.shootingline = self._canvas.create_arc(310, 600, 600, 350, style=tkinter.ARC, fill='black', dash=(3,5), extent=-100, start=180)
+        self.head = self._canvas.create_rectangle(180,405,250,475, fil='green', outline='black', tags='Body')
+        self.body = self._canvas.create_oval(180,470 , 240, 550, fill = 'blue', outline ='black', tags='Body')
+        self.arms = self._canvas.create_rectangle(235,490,310,500, fill = 'magenta', outline = 'black', tags='Body')
+        self.backboard = self._canvas.create_rectangle(780, 250, 798, 325, fill = 'white', outline = '#7E7E7E', dash = (3,5), width = 3, tags = 'hoop')
+        self.scoreboard = self._canvas.create_rectangle(430,50,845,150, fill='black', outline = '#D4AF37', width =5 )
+        self.pointssqr = self._canvas.create_rectangle(450, 72,550,146, fill="red", outline = 'white', width=4 )
+        self.timesqr = self._canvas.create_rectangle(565,54, 700, 94, fill='black', outline = 'white', width = 4)
+        self.sqr2 = self._canvas.create_rectangle(725, 72, 825, 146, fill='blue', outline = 'white', width=4)
+        #self.pointstring = tkinter.StringVar(self._canvas, "Score", ).canvas(800,800)
+        #self.pointsnum = ttk.Label(self.create_canvas(), textvariable = self.pointstring)
 
-        #if self.mouseclicked == True:
-            #self._canvas.show(self.shootingline)
+        #self.time = self._canvas.create_rectangle()
+        self._canvas.move('Body', -10, 40)
+        self._canvas.move('hoop', 400, 100)
+        self.startbutton = ttk.Button( self._frame, text = "Start", command=self.start  ).grid(column = 1, row= 1)
+
+        #if self.startbutton == True:
+            #(295,535)
         #else:
-            #self._canvas.delete(self.shootingline)
-
+            #ball_start_xpos = 100, ball_start_ypos = 100
 
     # Create a canvas for animation and add it to main window
     def create_canvas(self):
         self._canvas = tkinter.Canvas(self._frame, height=self._canvas_height, width=self._canvas_width)
-        self._canvas.grid(column=0, row=1)
-        self._canvas.configure(bg="white")
-        self._canvas.bind_all( '<Button-1>', self._print_location)
-        self._canvas.bind_all( '<ButtonRelease-1>', self._print_location2)
+        self._canvas.grid(column=3, row=3)
+        self._canvas.configure(bg="#55BED7")
+        self._canvas.bind( '<Button-1>', self._print_location)
+        self._canvas.bind( '<ButtonRelease-1>', self._print_location2)
         self._canvas.bind_all('<Key-Left>', self.moveleft)
         self._canvas.bind_all('<KeyRelease-Left>', self.stop)
         self._canvas.bind_all('<Key-Right>', self.moveright)
@@ -82,6 +103,14 @@ class BallAnimation():
         self._canvas.bind_all('<KeyRelease-Up>',self.stop)
         self._canvas.bind_all('<Key-Down>',self.down)
         self._canvas.bind_all('<KeyRelease-Down>', self.stop)
+
+        self.score = 0
+        self.scorestring = tkinter.StringVar(self._canvas, "Score= 0")
+        self.scoreboard = ttk.Label(self._canvas, textvariable=self.scorestring).place(anchor=tkinter.CENTER, x=500, y=500)
+
+        self.timer = 60
+        self.timerstr = tkinter.StringVar(self._canvas, "Time:")
+        self.timerlabel = ttk.Label(self._canvas, textvariable=self.timerstr).place(anchor=tkinter.CENTER, x=600, y=600)
 
     def _print_location(self, event):
         print( 'Button 1 was pressed at pixel x=%d, y=%d' % (event.x, event.y))
@@ -92,17 +121,17 @@ class BallAnimation():
     def _print_location2(self, event):
         print( 'Button 1 was released at pixel x=%d, y=%d' % (event.x, event.y))
         self.stop =  (event.x, event.y)
-        self._xinc = (self.start[0] - self.stop[0])/2.5
-        self._yinc = (self.start[1] - self.stop[1])/2.5
+        self._xinc = (self.start[0] - self.stop[0])/5
+        self._yinc = (self.start[1] - self.stop[1])/5
         if self.start[0] == self.stop[0]:
             self.gravity=0
         else:
-            self.gravity = 4.5
+            self.gravity = 2
 
         if self.start[1] == self.stop[1]:
             self.gravity = 0
         else:
-            self.gravity = 4.5
+            self.gravity = 2
         self.start = (event.x, event.y)
         self._canvas.coords(self._ball,
                             self.start[0] - self._ball_radius,
@@ -144,7 +173,7 @@ class BallAnimation():
                                               self._ball_start_ypos - self._ball_radius,
                                               self._ball_start_xpos + self._ball_radius,
                                               self._ball_start_ypos + self._ball_radius,
-                                              fill="brown", outline="white", width=4)
+                                              fill="#B54213", outline="black", width=1.5)
         self.gravity=0
 
 
@@ -155,8 +184,9 @@ class BallAnimation():
         xl, yl, xr, yr = self._canvas.coords(self._ball)
 
         # adding gravity
+        hoopcoords = self._canvas.coords(self.hoop)
         self._yinc = self._yinc + self.gravity  # the top of the screen is y = 0, bottom is y = window height
-        if (xr - self._xinc) <=700 and xr > 700 and (yl - self._yinc) <=325 and yl > 325:
+        if xl >= hoopcoords[0] and xr <= hoopcoords[2] and (yl - self._yinc) <=hoopcoords[1] and yl > hoopcoords[1]:
             if self.start[0]<400:
                 self.score= self.score + 3
 
@@ -180,6 +210,7 @@ class BallAnimation():
     # Update the power meter animation
     def animate_power_meter(self):
         # delete the existing one
+        print("powerfunction")
         self._canvas.delete('power_meter')
         # only update while the button is held down
         if not self.mouse_is_clicked:
@@ -199,8 +230,8 @@ class BallAnimation():
         arrow_start_pos = (xl+xr)/2., (yl+yr)/2.
 
         # Create the line
-        self._canvas.create_line(arrow_start_pos[0], arrow_start_pos[1], arrow_start_pos[0] + dx * scale,
-                                 arrow_start_pos[1] + dy * scale, tags='power_meter', arrow=tkinter.FIRST)
+        self._canvas.create_line(arrow_start_pos[0], arrow_start_pos[1], arrow_start_pos[0] - dx * scale,
+                                 arrow_start_pos[1] - dy * scale, tags='power_meter', arrow=tkinter.LAST, dash = (3,5))
         # Call this function again after _refresh_msec to update the power arrow
         self._root.after(self._refresh_msec, self.animate_power_meter)
 
