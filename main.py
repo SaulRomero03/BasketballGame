@@ -4,7 +4,7 @@ from tkinter import ttk
 
 class BallAnimation():
     def __init__(self, canvas_width=1200, canvas_height=800,
-                 ball_start_xpos=100, ball_start_ypos=100,
+                 ball_start_xpos=630, ball_start_ypos=210,
                  ball_radius=30, refresh_msec=10):
         # width of the animation window
         self._canvas_width = canvas_width
@@ -24,15 +24,21 @@ class BallAnimation():
         self.create_ball()
         self.create_background()
         self.mouse_is_clicked = False
-    def start(self):
+
+    def resetball(self):
         xl, yl, xr, yr = self._canvas.coords(self.arms)
-        y =  (yl + yr) /2
+        y = (yl + yr) / 2
         self._canvas.coords(self._ball,
                             xr - self._ball_radius,
                             y - self._ball_radius,
                             xr + self._ball_radius,
                             y + self._ball_radius)
+
+    def start(self):
+        self.resetball()
         self.animatetimer()
+
+
     def run(self, xinc, yinc):
         self._xinc = xinc
         self._yinc = yinc
@@ -57,9 +63,16 @@ class BallAnimation():
         #self.create_canvas()
 
     def animatetimer(self):
-        self.timer= self.timer - self._refresh_msec/1000 #(refresh_msec = .01)
-        self.timerstr.set("Time: %.2f" % self.timer)
-        self._root.after(self._refresh_msec, self.animatetimer)
+
+        self.timer= self.timer - self._refresh_msec/1000 * 10  #(refresh_msec = .01)
+        if self.timer<=0:
+            self.timer=0
+            self._canvas.delete(self._ball)
+            self._ball=None
+        self.timerstr.set("Time: %.1f" % self.timer)
+        if self.timer>0:
+            self._root.after(self._refresh_msec * 10 , self.animatetimer)
+
 
 
     def create_background(self):
@@ -67,26 +80,49 @@ class BallAnimation():
                                                 #(x1,y1 Left top Corner & x2,y2 Right Bottom corner))
         self.hoop = self._canvas.create_rectangle(700,320,780,325, fill='white', outline="#D0312D", tags = 'hoop', width = 2.5 )
 
-        self.head = self._canvas.create_rectangle(180,405,250,475, fil='green', outline='black', tags='Body')
-        self.body = self._canvas.create_oval(180,470 , 240, 550, fill = 'blue', outline ='black', tags='Body')
-        self.arms = self._canvas.create_rectangle(235,490,310,500, fill = 'magenta', outline = 'black', tags='Body')
-        self.backboard = self._canvas.create_rectangle(780, 250, 798, 325, fill = 'white', outline = '#7E7E7E', dash = (3,5), width = 3, tags = 'hoop')
-        self.scoreboard = self._canvas.create_rectangle(430,50,845,150, fill='black', outline = '#D4AF37', width =5 )
-        self.pointssqr = self._canvas.create_rectangle(450, 72,550,146, fill="red", outline = 'white', width=4 )
-        self.timesqr = self._canvas.create_rectangle(565,54, 700, 94, fill='black', outline = 'white', width = 4)
-        self.sqr2 = self._canvas.create_rectangle(725, 72, 825, 146, fill='blue', outline = 'white', width=4)
-        #self.pointstring = tkinter.StringVar(self._canvas, "Score", ).canvas(800,800)
-        #self.pointsnum = ttk.Label(self.create_canvas(), textvariable = self.pointstring)
+        self.head = self._canvas.create_rectangle(185,420,250,480, fil='green', outline='black', tags='Body')
+        self.body = self._canvas.create_oval(190,470 , 245, 550, fill = 'blue', outline ='black', tags='Body')
+        self.arms = self._canvas.create_rectangle(235,490,280,500, fill = 'magenta', outline = 'black', tags='Body')
+        self.backboard = self._canvas.create_rectangle(780, 210, 798, 325, fill = 'white', outline = '#7E7E7E', dash = (3,5), width = 3, tags = 'hoop')
+        self.scoreboard = self._canvas.create_rectangle(350,25,850,125, fill='black', outline = '#D4AF37', width =5 )
+        self.pointssqr = self._canvas.create_rectangle(375, 50,520,100, fill="red", outline = 'white', width=4 )
+        self.timesqr = self._canvas.create_rectangle(555,54, 665, 94, fill='black', outline = 'white', width = 4)
+        self.sqr2 = self._canvas.create_rectangle(690, 50, 830, 100, fill='blue', outline = 'white', width=4)
+        self.line = self._canvas.create_rectangle(1,585, 1999,800, fill='grey', outline = 'black' , width = 4)
+
+        self.instructions= tkinter.StringVar(self._canvas, "Instructions:")
+        self.instructionsstr = ttk.Label(self._canvas, textvariable=self.instructions).place(anchor=tkinter.CENTER, x=635, y=630)
+
+        self.str1 = tkinter.StringVar(self._canvas, "Rules are Simple")
+        self.string1 = ttk.Label(self._canvas, textvariable=self.str1).place(anchor=tkinter.CENTER, x=635, y=660)
+
+        self.str2 = tkinter.StringVar(self._canvas, "Make as many baskets as you can before the time runs out")
+        self.string2 = ttk.Label(self._canvas, textvariable=self.str2).place(anchor=tkinter.CENTER,x=635, y=680)
+
+        self.str3 = tkinter.StringVar(self._canvas, " Each time you score the player will move back further away from the hoop")
+        self.string3 = ttk.Label(self._canvas, textvariable=self.str3).place(anchor=tkinter.CENTER, x=635, y=700)
+
+        self.str6 = tkinter.StringVar(self._canvas, "Click & Drag on the ball to shoot")
+        self.string6 = ttk.Label(self._canvas, textvariable=self.str6).place(anchor=tkinter.CENTER, x=635, y=720)
+
+
+        self.str4 = tkinter.StringVar(self._canvas, " Good Luck!")
+        self.string4 = ttk.Label(self._canvas, textvariable=self.str4).place(anchor=tkinter.CENTER,x=635, y=740)
+
+        self.str5 = tkinter.StringVar(self._canvas, " Press the Start Button to begin")
+        self.string5 = ttk.Label(self._canvas, textvariable=self.str5).place(anchor=tkinter.CENTER,x=635, y=760)
+
 
         #self.time = self._canvas.create_rectangle()
-        self._canvas.move('Body', -10, 40)
-        self._canvas.move('hoop', 400, 100)
-        self.startbutton = ttk.Button( self._frame, text = "Start", command=self.start  ).grid(column = 1, row= 1)
+        self._canvas.move('Body', 700, 35)
+        self._canvas.move('hoop', 400, 0)
+        self.startbutton = ttk.Button( self._frame, text = "Start", command=self.start  ).grid(column = 0, row= 1)
 
-        #if self.startbutton == True:
-            #(295,535)
-        #else:
-            #ball_start_xpos = 100, ball_start_ypos = 100
+
+    #def instructions(self):
+
+
+
 
     # Create a canvas for animation and add it to main window
     def create_canvas(self):
@@ -105,12 +141,18 @@ class BallAnimation():
         self._canvas.bind_all('<KeyRelease-Down>', self.stop)
 
         self.score = 0
-        self.scorestring = tkinter.StringVar(self._canvas, "Score= 0")
-        self.scoreboard = ttk.Label(self._canvas, textvariable=self.scorestring).place(anchor=tkinter.CENTER, x=500, y=500)
+        self.scorestring = tkinter.StringVar(self._canvas, " Score: 0")
+        self.scoreboard = ttk.Label(self._canvas, textvariable=self.scorestring).place(anchor=tkinter.CENTER, x=450, y=75)
 
         self.timer = 60
         self.timerstr = tkinter.StringVar(self._canvas, "Time:")
-        self.timerlabel = ttk.Label(self._canvas, textvariable=self.timerstr).place(anchor=tkinter.CENTER, x=600, y=600)
+        self.timerlabel = ttk.Label(self._canvas, textvariable=self.timerstr).place(anchor=tkinter.CENTER, x=610, y=75)
+
+        self.miss = 0
+        self.missstr= tkinter.StringVar(self._canvas, "Miss Shots: 0")
+        self.misslabel = ttk.Label( self._canvas, textvariable = self.missstr).place (anchor=tkinter.CENTER, x=760, y=75)
+
+        self.miss == self.miss + 1
 
     def _print_location(self, event):
         print( 'Button 1 was pressed at pixel x=%d, y=%d' % (event.x, event.y))
@@ -121,8 +163,8 @@ class BallAnimation():
     def _print_location2(self, event):
         print( 'Button 1 was released at pixel x=%d, y=%d' % (event.x, event.y))
         self.stop =  (event.x, event.y)
-        self._xinc = (self.start[0] - self.stop[0])/5
-        self._yinc = (self.start[1] - self.stop[1])/5
+        self._xinc = (self.start[0] - self.stop[0])/4
+        self._yinc = (self.start[1] - self.stop[1])/4
         if self.start[0] == self.stop[0]:
             self.gravity=0
         else:
@@ -167,6 +209,9 @@ class BallAnimation():
 
 
 
+
+
+
     # Create the ball at the initial position on the canvas
     def create_ball(self):
         self._ball = self._canvas.create_oval(self._ball_start_xpos - self._ball_radius,
@@ -179,6 +224,8 @@ class BallAnimation():
 
     # Update the ball animation, end with callback after self._refresh_msec
     def animate_ball(self):
+        if not self._ball:
+            return
         self._canvas.move(self._ball, self._xinc, self._yinc)
         # Get the current coordinates of the bounding box of the ball
         xl, yl, xr, yr = self._canvas.coords(self._ball)
@@ -186,31 +233,40 @@ class BallAnimation():
         # adding gravity
         hoopcoords = self._canvas.coords(self.hoop)
         self._yinc = self._yinc + self.gravity  # the top of the screen is y = 0, bottom is y = window height
-        if xl >= hoopcoords[0] and xr <= hoopcoords[2] and (yl - self._yinc) <=hoopcoords[1] and yl > hoopcoords[1]:
+        buffer=15
+        if xl >= hoopcoords[0]-buffer and xr <= hoopcoords[2]+buffer and (yl - self._yinc) <=hoopcoords[1] and yl > hoopcoords[1]:
             if self.start[0]<400:
                 self.score= self.score + 3
 
             else:
                 self.score = self.score +2
             self.scorestring.set("Score=%d" % self.score)
-        # if xr > self._canvas_width - abs(self._xinc):
-        #     #if self.start[0]>400:
-        #     if self._canvas_width-self.start[0]:
-        #         self.score = self.score + 3
-        #     else:
-        #         self.score = self.score + 2
-        #     self.scorestring.set("Score=%d" %self.score)
-        if xl < abs(self._xinc) or xr > self._canvas_width - abs(self._xinc):
-            self._xinc = -self._xinc * 0.8
+            self._canvas.move('Body', - 25,0)
+        backboardcoords= self._canvas.coords(self.backboard)
+        if xr >= backboardcoords[0] and xr - self._xinc < backboardcoords[0] and yr > backboardcoords[1] and yl < backboardcoords[3]:
+            self._xinc= -self._xinc * 0.8
+            print('hitbackboard')
 
-        if yl < abs(self._yinc) or yr > self._canvas_height - abs(self._yinc):
-            self._yinc = -self._yinc * 0.8
+        elif xl < abs(self._xinc) or xr > self._canvas_width - abs(self._xinc):
+            self.resetball()
+            self._xinc=0
+            self._yinc=0
+            self.gravity=0
+            self.miss = self.miss + 1
+            self.missstr.set("Missed: %d" % self.miss)
+        elif yl < abs(self._yinc) or yr > self._canvas_height - abs(self._yinc):
+            self.resetball()
+            self._xinc = 0
+            self._yinc = 0
+            self.gravity=0
+            self.miss = self.miss + 1
+            self.missstr.set("Missed: %d" % self.miss)
         self._root.after(self._refresh_msec, self.animate_ball)
 
     # Update the power meter animation
     def animate_power_meter(self):
         # delete the existing one
-        print("powerfunction")
+        #print("powerfunction")
         self._canvas.delete('power_meter')
         # only update while the button is held down
         if not self.mouse_is_clicked:
